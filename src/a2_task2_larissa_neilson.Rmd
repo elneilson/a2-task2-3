@@ -1,0 +1,39 @@
+---
+title: "Task 2 - Palmetto binary logistic regression"
+author: "Larissa Neilson"
+date: "2/5/2021"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(here)
+library(janitor)
+library(GGally)
+library(broom)
+library(jtools)
+```
+
+```{r}
+# Read in data
+palmetto <- read_csv(here("data", "palmetto.csv"),
+                     col_types = cols(.default = "c")) %>%
+  mutate(height = as.numeric(height)) %>% 
+  clean_names()
+```
+
+```{r}
+
+```
+
+#### Data citation
+
+Abrahamson, W.G. 2019. Survival, growth and biomass estimates of two dominant palmetto species of south-central Florida from 1981 - 2017, ongoing at 5-year intervals ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/f2f96ec76fbbd4b9db431c79a770c4d5
+
