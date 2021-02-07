@@ -25,13 +25,42 @@ library(jtools)
 # Read in data
 palmetto <- read_csv(here("data", "palmetto.csv"),
                      col_types = cols(.default = "c")) %>%
-  mutate(height = as.numeric(height)) %>% 
+  mutate(height = as.numeric(height)) %>%
+  mutate(length = as.numeric(length)) %>%
+  mutate(width = as.numeric(width)) %>% 
+  mutate(green_lvs = as.numeric(green_lvs)) %>% 
   clean_names()
 ```
 
 ```{r}
-
+# Create smaller subset to work with
+palmetto_new <- palmetto %>% 
+  select(species, height, length, width, green_lvs)
 ```
+
+```{r}
+# Visualize the data
+ggplot(data = palmetto_new, aes(x = height, y = length)) +
+  geom_point(aes(color = species)) +
+  labs(x = "Height (cm)", y = "Length (cm)") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data = palmetto_new, aes(x = height, y = width)) +
+  geom_point(aes(color = species)) +
+  labs(x = "Height (cm)", y = "Width (cm)") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data = palmetto_new, aes(x = height, y = green_lvs)) +
+  geom_col(aes(color = species)) +
+  labs(x = "Height (cm)", y = "Green Leaf Count") +
+  theme_minimal()
+```
+
+
 
 #### Data citation
 
