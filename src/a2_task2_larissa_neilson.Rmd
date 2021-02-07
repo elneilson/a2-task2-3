@@ -1,5 +1,5 @@
 ---
-title: "Task 2 - Palmetto binary logistic regression"
+title: "Palmetto binary logistic regression"
 author: "Larissa Neilson"
 date: "2/5/2021"
 output:
@@ -19,47 +19,110 @@ library(janitor)
 library(GGally)
 library(broom)
 library(jtools)
+library(kableExtra)
+library(stargazer)
 ```
 
 ```{r}
-# Read in data
+# Read in the data and convert columns to numeric
 palmetto <- read_csv(here("data", "palmetto.csv"),
                      col_types = cols(.default = "c")) %>%
   mutate(height = as.numeric(height)) %>%
   mutate(length = as.numeric(length)) %>%
   mutate(width = as.numeric(width)) %>% 
-  mutate(green_lvs = as.numeric(green_lvs)) %>% 
+  mutate(green_lvs = as.numeric(green_lvs)) %>%
   clean_names()
 ```
 
 ```{r}
-# Create smaller subset to work with
+# Create smaller subset to work with and convert species to a factor
 palmetto_new <- palmetto %>% 
-  select(species, height, length, width, green_lvs)
+  select(species, height, length, width, green_lvs) %>%
+  mutate(species = as.factor(species))
 ```
 
 ```{r}
-# Visualize the data
+# Visualize the data in three graphs comparing the variables to height
 ggplot(data = palmetto_new, aes(x = height, y = length)) +
-  geom_point(aes(color = species)) +
+  geom_col(aes(color = species, fill = species)) +
   labs(x = "Height (cm)", y = "Length (cm)") +
+  scale_color_discrete(name = "Species",
+                       labels = c("Serenoa repens", "Sabal etonia")) +
+  scale_fill_discrete(name = "Species",
+                      labels = c("Serenoa repens", "Sabal etonia")) +
   theme_minimal()
 ```
+
+**Figure 1.** Tree height vs. canopy length for both palmetto species.
+
+- *Serenoa repens* has a greater canopy length than *Sabal etonia* overall. Canopy length starts to decrease as the trees get taller.
 
 ```{r}
 ggplot(data = palmetto_new, aes(x = height, y = width)) +
-  geom_point(aes(color = species)) +
+  geom_col(aes(color = species, fill = species)) +
   labs(x = "Height (cm)", y = "Width (cm)") +
+  scale_fill_discrete(name = "Species", 
+  labels = c("Serenoa repens", "Sabal etonia")) +
+  scale_color_discrete(name = "Species",
+                       labels = c("Serenoa repens", "Sabal etonia")) +
+  scale_fill_discrete(name = "Species",
+                      labels = c("Serenoa repens", "Sabal etonia")) +
   theme_minimal()
 ```
+
+**Figure 2.** Tree height vs. canopy width for both palmetto species.
+
+- *Serenoa repens* has a greater canopy width than *Sabal etonia* overall. Canopy width starts to decrease as the trees get taller.
 
 ```{r}
 ggplot(data = palmetto_new, aes(x = height, y = green_lvs)) +
-  geom_col(aes(color = species)) +
+  geom_col(aes(color = species, fill = species)) +
   labs(x = "Height (cm)", y = "Green Leaf Count") +
+  scale_color_discrete(name = "Species",
+                       labels = c("Serenoa repens", "Sabal etonia")) +
+  scale_fill_discrete(name = "Species",
+                      labels = c("Serenoa repens", "Sabal etonia")) +
   theme_minimal()
 ```
 
+**Figure 3.** Tree height vs. green leaf count for both palmetto species.
+
+- *Serenoa repens* has significantly more green leaves than *Sabal etonia*. Green leaf count starts to decrease as the trees get taller.
+
+```{r, results = FALSE}
+# Palmetto binary logistic regression
+palmetto_blr <- glm(species ~ height + length + width + green_lvs,
+                            data = palmetto_new,
+                            family = "binomial")
+palmetto_blr
+
+summary(palmetto_blr)
+```
+
+```{r}
+# Make finalized graph of blr results
+palmetto_blr_tidy <- tidy(palmetto_blr)
+
+palmetto_blr_tidy %>% 
+  kbl(col.names = c(" ",
+                    "Estimate",
+                    "Standard Error",
+                    "Statistic",
+                    "P-value")) %>% 
+  kable_styling()
+```
+
+```{r}
+# Make fitted dataset
+palmetto_blr_fitted <- palmetto_blr %>%
+  augment(type.predict = "response")
+
+# Finalized table
+palmetto_fitted_prob <- palmetto_blr_fitted %>% 
+  mutate(predicted = case_when(.fitted >= .5 ~ "Correct",
+                               .fitted <= .5 ~ "Incorrect")) %>% 
+  mutate(number_correct = case_when(predicted))
+```
 
 
 #### Data citation
